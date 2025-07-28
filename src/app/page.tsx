@@ -1,103 +1,225 @@
+"use client";
+import React, { useState, useRef, useEffect } from "react";
+import { DateRange } from "react-date-range";
+import { addDays, format } from "date-fns";
+import "react-date-range/dist/styles.css";
+import "react-date-range/dist/theme/default.css";
+import { MetricCard } from "../components/MetricCard";
+import { LineChart } from "../components/LineChart";
+import { DonutChart } from "../components/DonutChart";
+import { FunnelChart } from "../components/FunnelChart";
+import { CampaignTable } from "../components/CampaignTable";
+import { ThemeToggle } from "../components/ThemeToggle";
+import { metricsData } from "../data/metrics";
+import {
+  revenueTrendData,
+  trafficSourcesData,
+  conversionFunnelData,
+} from "../data/charts";
+import { campaignsData } from "../data/campaigns";
 import Image from "next/image";
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+export default function Dashboard() {
+  const [dateRange, setDateRange] = useState([
+    {
+      startDate: addDays(new Date(), -6),
+      endDate: new Date(),
+      key: "selection",
+    },
+  ]);
+  const [showPicker, setShowPicker] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [channelFilter, setChannelFilter] = useState<string>("All");
+  const statusOptions = ["All", "Active", "Paused", "Ended"];
+  const channelOptions = ["All", ...Array.from(new Set(campaignsData.map(c => c.channel)))];
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+  // Filter campaigns by status, channel, and (mock) date range
+  const filteredCampaigns = campaignsData.filter(c =>
+    (statusFilter === "All" || c.status === statusFilter) &&
+    (channelFilter === "All" || c.channel === channelFilter)
+    // Date range filtering would go here if data had dates
+  );
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        pickerRef.current &&
+        !pickerRef.current.contains(event.target as Node) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setShowPicker(false);
+      }
+    }
+    if (showPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showPicker]);
+
+  return (
+    <div className="min-h-screen flex bg-gray-50 dark:bg-neutral-900">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-gray-200 dark:border-neutral-700 flex flex-col justify-between py-5 px-3 hidden md:flex">
+        <div>
+          <div className="flex items-center gap-2 mb-8">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src="/logo.jpeg"
+              alt="ADmyBRAND Logo"
+              width={28}
+              height={28}
+              className="rounded-lg"
+              priority
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <img src="https://in.admybrand.com/assets/svg/web_logo.svg" alt="ADmyBRAND SVG Logo" className="h-6 w-auto" />
+          </div>
+          <nav className="flex flex-col gap-2">
+            <a className="py-2 px-3 rounded-lg bg-blue-50 text-blue-700 font-semibold dark:bg-neutral-700 dark:text-white" href="#">Dashboard</a>
+            <a className="py-2 px-3 rounded-lg hover:bg-neutral-700 hover:text-white dark:hover:bg-neutral-700 dark:hover:text-white" href="#">Analytics</a>
+            <a className="py-2 px-3 rounded-lg hover:bg-neutral-700 hover:text-white dark:hover:bg-neutral-700 dark:hover:text-white" href="#">Campaigns</a>
+            <a className="py-2 px-3 rounded-lg hover:bg-neutral-700 hover:text-white dark:hover:bg-neutral-700 dark:hover:text-white" href="#">Audience</a>
+            <a className="py-2 px-3 rounded-lg hover:bg-neutral-700 hover:text-white dark:hover:bg-neutral-700 dark:hover:text-white" href="#">Channels</a>
+            <a className="py-2 px-3 rounded-lg hover:bg-neutral-700 hover:text-white dark:hover:bg-neutral-700 dark:hover:text-white" href="#">Reports</a>
+          </nav>
+          <div className="mt-8">
+            <div className="text-xs text-gray-400 dark:text-gray-300 uppercase mb-2">Settings</div>
+            <nav className="flex flex-col gap-2">
+              <a className="py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm" href="#">General</a>
+              <a className="py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm" href="#">Notifications</a>
+              <a className="py-2 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-700 text-sm" href="#">API Keys</a>
+            </nav>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="flex items-center gap-3 mt-8">
+          <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-neutral-700" />
+          <div>
+            <div className="font-semibold text-sm">Alex Morgan</div>
+            <div className="text-xs text-gray-400 dark:text-gray-300">Marketing Director</div>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top Bar */}
+        <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 sticky top-0 z-10">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
+            <div className="flex gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+              <button className="border-b-2 border-blue-600 text-blue-700 font-semibold pb-1">Overview</button>
+              <button className="hover:text-blue-600">Performance</button>
+              <button className="hover:text-blue-600">Conversions</button>
+              <button className="hover:text-blue-600">Campaigns</button>
+              <button className="hover:text-blue-600">Audience</button>
+            </div>
+          </div>
+          <div className="flex items-center gap-4">
+            <input className="rounded-lg border px-3 py-1.5 text-sm bg-gray-100 dark:bg-neutral-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-neutral-400 border-gray-300 dark:border-neutral-700 focus:outline-none" placeholder="Search..." />
+            <ThemeToggle />
+          </div>
+        </header>
+        <main className="flex-1 p-6 space-y-6">
+          {/* Advanced Filters */}
+          <div className="flex flex-wrap items-center gap-4 mb-2">
+            <div className="relative inline-block">
+              <button
+                ref={buttonRef}
+                className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-sm font-medium hover:bg-gray-200 dark:hover:bg-neutral-700 transition"
+                onClick={() => setShowPicker((v) => !v)}
+              >
+                {format(dateRange[0].startDate, "MMM d, yyyy")} - {format(dateRange[0].endDate, "MMM d, yyyy")}
+              </button>
+              {showPicker && (
+                <div
+                  ref={pickerRef}
+                  className="absolute right-0 top-full mt-2 z-30 w-[320px] max-w-xs max-h-[400px] overflow-auto shadow-lg rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700"
+                >
+                  <DateRange
+                    editableDateInputs={true}
+                    onChange={(item) => setDateRange([item.selection])}
+                    moveRangeOnFirstSelection={false}
+                    ranges={dateRange}
+                    maxDate={new Date()}
+                    className="shadow-lg rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+            <select
+              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 text-sm text-gray-900 dark:text-white focus:outline-none"
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+            >
+              {statusOptions.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            <select
+              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 text-sm text-gray-900 dark:text-white focus:outline-none"
+              value={channelFilter}
+              onChange={e => setChannelFilter(e.target.value)}
+            >
+              {channelOptions.map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Metrics Cards */}
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {metricsData.map((metric, idx) => (
+              <MetricCard key={idx} {...metric} />
+            ))}
+          </section>
+
+          {/* Charts */}
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[300px] col-span-2">
+              <LineChart
+                data={revenueTrendData}
+                title="Revenue Trend"
+                subtitle="Monthly revenue performance"
+              />
+            </div>
+            <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[300px]">
+              <DonutChart
+                data={trafficSourcesData}
+                title="Traffic Sources"
+                subtitle="Top channels"
+              />
+            </div>
+          </section>
+
+          {/* Conversion Funnel & Table */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[250px] flex flex-col justify-between">
+              <FunnelChart
+                data={conversionFunnelData}
+                title="Conversion Funnel"
+                subtitle="User journey conversion rates"
+              />
+              <div className="mt-4 flex flex-col gap-2">
+                <button className="self-start px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
+                  View full funnel report
+                </button>
+                <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
+                  <span>Funnel performance up by 5% compared to last week</span> <span role="img" aria-label="up">📈</span>
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-300">
+                  75% drop-off from Visits to Purchase
+                </div>
+              </div>
+            </div>
+            <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[250px]">
+              <CampaignTable data={filteredCampaigns} />
+            </div>
+          </section>
+        </main>
+      </div>
     </div>
   );
 }
