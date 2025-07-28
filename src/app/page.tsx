@@ -1,4 +1,5 @@
 "use client";
+import { Range } from "react-date-range";
 import React, { useState, useRef, useEffect } from "react";
 import { DateRange } from "react-date-range";
 import { addDays, format } from "date-fns";
@@ -20,7 +21,7 @@ import { campaignsData } from "../data/campaigns";
 import Image from "next/image";
 
 export default function Dashboard() {
-  const [dateRange, setDateRange] = useState([
+  const [dateRange, setDateRange] = useState<Range[]>([
     {
       startDate: addDays(new Date(), -6),
       endDate: new Date(),
