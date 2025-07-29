@@ -132,8 +132,8 @@ export default function Dashboard() {
                 className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-sm font-medium hover:bg-gray-200 dark:hover:bg-neutral-700 transition"
                 onClick={() => setShowPicker((v) => !v)}
               >
-                {format(dateRange[0].startDate, "MMM d, yyyy")} - {format(dateRange[0].endDate, "MMM d, yyyy")}
-              </button>
+{format(dateRange[0].startDate!, "MMM d, yyyy")} - {format(dateRange[0].endDate!, "MMM d, yyyy")}
+</button>
               {showPicker && (
                 <div
                   ref={pickerRef}
