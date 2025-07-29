@@ -36,15 +36,19 @@ const columns = [
   { key: "roi", label: "ROI" },
 ];
 
-function compare(a: any, b: any, key: keyof Campaign, dir: "asc" | "desc") {
+function compare(a: Campaign, b: Campaign, key: keyof Campaign, dir: "asc" | "desc") {
   if (key === "status") {
-    const aVal = statusOrder[a[key]] || 99;
-    const bVal = statusOrder[b[key]] || 99;
+    const aStatus = a[key] as keyof typeof statusOrder;
+    const bStatus = b[key] as keyof typeof statusOrder;
+    const aVal = statusOrder[aStatus] ?? 99;
+    const bVal = statusOrder[bStatus] ?? 99;
     return dir === "asc" ? aVal - bVal : bVal - aVal;
   }
+
   if (typeof a[key] === "number" && typeof b[key] === "number") {
-    return dir === "asc" ? a[key] - b[key] : b[key] - a[key];
+    return dir === "asc" ? (a[key] as number) - (b[key] as number) : (b[key] as number) - (a[key] as number);
   }
+
   return dir === "asc"
     ? String(a[key]).localeCompare(String(b[key]), undefined, { sensitivity: "base" })
     : String(b[key]).localeCompare(String(a[key]), undefined, { sensitivity: "base" });
