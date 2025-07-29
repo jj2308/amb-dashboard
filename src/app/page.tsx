@@ -34,13 +34,11 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const [channelFilter, setChannelFilter] = useState<string>("All");
   const statusOptions = ["All", "Active", "Paused", "Ended"];
-  const channelOptions = ["All", ...Array.from(new Set(campaignsData.map(c => c.channel)))];
+  const channelOptions = ["All", ...Array.from(new Set(campaignsData.map(c => c.channel)))]
 
-  // Filter campaigns by status, channel, and (mock) date range
   const filteredCampaigns = campaignsData.filter(c =>
     (statusFilter === "All" || c.status === statusFilter) &&
     (channelFilter === "All" || c.channel === channelFilter)
-    // Date range filtering would go here if data had dates
   );
 
   useEffect(() => {
@@ -64,18 +62,10 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-neutral-900">
-      {/* Sidebar */}
       <aside className="w-64 bg-white dark:bg-neutral-800 border-r border-gray-200 dark:border-neutral-700 flex flex-col justify-between py-5 px-3 hidden md:flex">
         <div>
           <div className="flex items-center gap-2 mb-8">
-            <Image
-              src="/logo.jpeg"
-              alt="ADmyBRAND Logo"
-              width={28}
-              height={28}
-              className="rounded-lg"
-              priority
-            />
+            <Image src="/logo.jpeg" alt="ADmyBRAND Logo" width={28} height={28} className="rounded-lg" priority />
             <img src="https://in.admybrand.com/assets/svg/web_logo.svg" alt="ADmyBRAND SVG Logo" className="h-6 w-auto" />
           </div>
           <nav className="flex flex-col gap-2">
@@ -103,10 +93,7 @@ export default function Dashboard() {
           </div>
         </div>
       </aside>
-
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Bar */}
         <header className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 sticky top-0 z-10">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Dashboard Overview</h1>
@@ -124,24 +111,15 @@ export default function Dashboard() {
           </div>
         </header>
         <main className="flex-1 p-6 space-y-6">
-          {/* Advanced Filters */}
           <div className="flex flex-wrap items-center gap-4 mb-2">
             <div className="relative inline-block">
-            <button
-  ref={buttonRef}
-  className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-sm font-medium hover:bg-gray-200 dark:hover:bg-neutral-700 transition"
-  onClick={() => setShowPicker((v) => !v)}
->
-  {dateRange[0]?.startDate && dateRange[0]?.endDate
-    ? `${format(dateRange[0].startDate, "MMM d, yyyy")} - ${format(dateRange[0].endDate, "MMM d, yyyy")}`
-    : "Select Date"}
-</button>
-
+              <button ref={buttonRef} className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-neutral-800 border border-gray-300 dark:border-neutral-700 text-sm font-medium hover:bg-gray-200 dark:hover:bg-neutral-700 transition" onClick={() => setShowPicker((v) => !v)}>
+                {dateRange[0]?.startDate && dateRange[0]?.endDate
+                  ? `${format(dateRange[0].startDate, "MMM d, yyyy")} - ${format(dateRange[0].endDate, "MMM d, yyyy")}`
+                  : "Select Date"}
+              </button>
               {showPicker && (
-                <div
-                  ref={pickerRef}
-                  className="absolute right-0 top-full mt-2 z-30 w-[320px] max-w-xs max-h-[400px] overflow-auto shadow-lg rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700"
-                >
+                <div ref={pickerRef} className="absolute right-0 top-full mt-2 z-30 w-[320px] max-w-xs max-h-[400px] overflow-auto shadow-lg rounded-lg bg-white dark:bg-neutral-800 border border-gray-200 dark:border-neutral-700">
                   <DateRange
                     editableDateInputs={true}
                     onChange={(item) => setDateRange([item.selection])}
@@ -153,69 +131,39 @@ export default function Dashboard() {
                 </div>
               )}
             </div>
-            <select
-              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 text-sm text-gray-900 dark:text-white focus:outline-none"
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value)}
-            >
+            <select className="px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 text-sm text-gray-900 dark:text-white focus:outline-none" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
               {statusOptions.map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
-            <select
-              className="px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 text-sm text-gray-900 dark:text-white focus:outline-none"
-              value={channelFilter}
-              onChange={e => setChannelFilter(e.target.value)}
-            >
+            <select className="px-3 py-2 rounded-lg border border-gray-300 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800 text-sm text-gray-900 dark:text-white focus:outline-none" value={channelFilter} onChange={e => setChannelFilter(e.target.value)}>
               {channelOptions.map(opt => (
                 <option key={opt} value={opt}>{opt}</option>
               ))}
             </select>
           </div>
-
-          {/* Metrics Cards */}
           <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {metricsData.map((metric, idx) => (
               <MetricCard key={idx} {...metric} />
             ))}
           </section>
-
-          {/* Charts */}
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[300px] col-span-2">
-              <LineChart
-                data={revenueTrendData}
-                title="Revenue Trend"
-                subtitle="Monthly revenue performance"
-              />
+              <LineChart data={revenueTrendData} title="Revenue Trend" subtitle="Monthly revenue performance" />
             </div>
             <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[300px]">
-              <DonutChart
-                data={trafficSourcesData}
-                title="Traffic Sources"
-                subtitle="Top channels"
-              />
+              <DonutChart data={trafficSourcesData} title="Traffic Sources" subtitle="Top channels" />
             </div>
           </section>
-
-          {/* Conversion Funnel & Table */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[250px] flex flex-col justify-between">
-              <FunnelChart
-                data={conversionFunnelData}
-                title="Conversion Funnel"
-                subtitle="User journey conversion rates"
-              />
+              <FunnelChart data={conversionFunnelData} title="Conversion Funnel" subtitle="User journey conversion rates" />
               <div className="mt-4 flex flex-col gap-2">
-                <button className="self-start px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">
-                  View full funnel report
-                </button>
+                <button className="self-start px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">View full funnel report</button>
                 <div className="text-sm text-green-600 dark:text-green-400 flex items-center gap-1">
                   <span>Funnel performance up by 5% compared to last week</span> <span role="img" aria-label="up">📈</span>
                 </div>
-                <div className="text-xs text-gray-500 dark:text-gray-300">
-                  75% drop-off from Visits to Purchase
-                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-300">75% drop-off from Visits to Purchase</div>
               </div>
             </div>
             <div className="bg-white dark:bg-neutral-800 rounded-xl p-5 shadow min-h-[250px]">
