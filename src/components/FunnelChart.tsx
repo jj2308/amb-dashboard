@@ -24,7 +24,14 @@ export const FunnelChart: React.FC<FunnelChartProps> = ({ data, title, subtitle 
           <YAxis type="category" dataKey="stage" tick={{ fontSize: 13 }} axisLine={false} tickLine={false} width={110} />
           <Tooltip formatter={(v: number) => v.toLocaleString()} />
           <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 8, 8]} barSize={22}>
-            <LabelList dataKey="percent" position="right" formatter={(v: number) => `${v}%`} fill="#64748b" fontSize={13} />
+          <LabelList
+  dataKey="percent"
+  position="right"
+  formatter={(label: React.ReactNode) => `${Number(label)}%`}
+  fill="#64748b"
+  fontSize={13}
+/>
+
           </Bar>
         </BarChart>
       </ResponsiveContainer>
